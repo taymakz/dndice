@@ -79,7 +79,9 @@ export function expandRolls(rolls: RolledDie[]): StageEntry[] {
   const entries: StageEntry[] = []
   for (const die of rolls) {
     if (die.type === "d100") {
-      const tens = Math.floor(die.value / 10) % 10
+      // Tens faces read 00–90 (never "01"), matching real percentile dice;
+      // 00+0 renders as 100.
+      const tens = (Math.floor(die.value / 10) % 10) * 10
       const ones = die.value % 10
       entries.push(
         {
