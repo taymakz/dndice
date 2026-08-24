@@ -67,10 +67,10 @@ export function FallbackRolls({ rolls, revealed }: FallbackRollsProps) {
                     value={revealed ? die.value : "?"}
                     className={
                       highlight === "max"
-                        ? "[&>*]:fill-emerald-500/20 [&>*]:stroke-emerald-600 dark:[&>*]:stroke-emerald-400"
+                        ? "[&>*]:fill-red-500/25 [&>*]:stroke-red-600 dark:[&>*]:stroke-red-400"
                         : highlight === "min"
-                          ? "[&>*]:fill-red-500/20 [&>*]:stroke-red-600 dark:[&>*]:stroke-red-400"
-                          : "[&>*]:fill-primary/10 [&>*]:stroke-foreground/80"
+                          ? "[&>*]:fill-red-500/20 [&>*]:stroke-red-700 dark:[&>*]:stroke-red-300"
+                          : "[&>*]:fill-red-500/15 [&>*]:stroke-red-600/80 dark:[&>*]:stroke-red-400/80"
                     }
                     style={{ width: size, height: size }}
                   />
@@ -94,7 +94,7 @@ export function IdleHint() {
       <div className="rounded-full border border-dashed p-5">
         <DieFace
           type="d20"
-          className="size-16 [&>*]:fill-muted [&>*]:stroke-muted-foreground/40"
+          className="size-16 [&>*]:fill-red-500/10 [&>*]:stroke-red-500/40"
         />
       </div>
       <div>

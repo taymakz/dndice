@@ -214,7 +214,7 @@ export function SettingsMenu({
                   >
                     <DieFace
                       type={item.type}
-                      className="size-4 [&>*]:fill-primary/15 [&>*]:stroke-foreground/70"
+                      className="size-4 [&>*]:fill-red-500/15 [&>*]:stroke-red-600/70 dark:[&>*]:stroke-red-400/70"
                     />
                     <span dir="ltr" className="text-[11px] font-bold">
                       {item.type}
@@ -279,7 +279,7 @@ export function SettingsMenu({
               >
                 <DieFace
                   type={type}
-                  className="size-7 [&>*]:fill-primary/10 [&>*]:stroke-foreground/60"
+                  className="size-7 [&>*]:fill-red-500/10 [&>*]:stroke-red-600/60 dark:[&>*]:stroke-red-400/60"
                 />
                 <span dir="ltr" className="text-sm font-bold">
                   {type}

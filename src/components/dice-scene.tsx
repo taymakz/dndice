@@ -19,20 +19,20 @@ interface Palette {
 
 const PALETTES: Record<"dark" | "light", Palette> = {
   dark: {
-    body: "#26262e",
-    number: "#f2efe6",
-    accentBody: "#c93a30",
+    body: "#c93a30",
+    number: "#fdf6ee",
+    accentBody: "#a02a22",
     accentNumber: "#fdf6ee",
   },
   light: {
-    body: "#edeade",
-    number: "#33302a",
-    accentBody: "#bf3b30",
+    body: "#bf3b30",
+    number: "#fdf6ee",
+    accentBody: "#9e2b22",
     accentNumber: "#fdf6ee",
   },
 }
 
-const HIGHLIGHT_COLORS = { max: "#22c55e", min: "#ef4444" } as const
+const HIGHLIGHT_COLORS = { max: "#ff6b5e", min: "#7f1d16" } as const
 
 /** Direction faces point towards once a die settles (towards the camera). */
 const READ_DIR = new THREE.Vector3(0, 0.17, 1).normalize()
