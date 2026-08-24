@@ -46,15 +46,16 @@ export function buildFormula(pool: DieType[], modifier: number): string | null {
     counts.set(type, (counts.get(type) ?? 0) + 1)
   }
 
-  const parts = [...counts.entries()].map(
-    ([type, count]) => `${count}${type}`
-  )
+  let formula = [...counts.entries()]
+    .map(([type, count]) => `${count}${type}`)
+    .join(" + ")
 
-  if (modifier !== 0 || parts.length === 0) {
-    parts.push(`${modifier >= 0 ? "+" : "-"} ${Math.abs(modifier)}`)
+  if (modifier !== 0) {
+    const term = `${modifier > 0 ? "+" : "-"} ${Math.abs(modifier)}`
+    formula = formula ? `${formula} ${term}` : term
   }
 
-  return parts.join(" + ")
+  return formula === "" ? null : formula
 }
 
 /* ------------------------------------------------------------------ */
