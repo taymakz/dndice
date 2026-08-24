@@ -165,10 +165,7 @@ const GEOMETRY_SCALE: Record<string, number> = {
 
 const geometryCache = new Map<string, THREE.BufferGeometry>()
 
-function getDieGeometry(
-  variant: Variant,
-  type: DieType
-): THREE.BufferGeometry {
+function getDieGeometry(variant: Variant, type: DieType): THREE.BufferGeometry {
   const key = `${variant}:${type}`
   const cached = geometryCache.get(key)
   if (cached) return cached
@@ -232,9 +229,7 @@ function getFaces(variant: Variant, type: DieType): FaceInfo[] {
   const ac = new THREE.Vector3()
   const n = new THREE.Vector3()
   const centroid = new THREE.Vector3()
-  const minDot = Math.cos(
-    THREE.MathUtils.degToRad(FACE_CLUSTER_TOLERANCE_DEG)
-  )
+  const minDot = Math.cos(THREE.MathUtils.degToRad(FACE_CLUSTER_TOLERANCE_DEG))
 
   interface Cluster {
     sum: THREE.Vector3
@@ -291,8 +286,7 @@ function getFaces(variant: Variant, type: DieType): FaceInfo[] {
   faces.sort(
     (f1, f2) =>
       Math.atan2(f1.normal.z, f1.normal.x) -
-        Math.atan2(f2.normal.z, f2.normal.x) ||
-      f1.normal.y - f2.normal.y
+        Math.atan2(f2.normal.z, f2.normal.x) || f1.normal.y - f2.normal.y
   )
 
   faceCache.set(key, faces)
@@ -470,6 +464,15 @@ function DieBody({
   const labelIndex = Math.max(labels.indexOf(entry.label), 0)
   const face = faces[labelIndex % faces.length]
 
+  /** Per-face settle orientation — each number plane needs its own. */
+  const settleQuats = React.useMemo(
+    () =>
+      faces.map((f) =>
+        new THREE.Quaternion().setFromUnitVectors(f.normal, CAMERA_DIR)
+      ),
+    [faces]
+  )
+
   const finalQuat = React.useMemo(() => {
     const q = new THREE.Quaternion().setFromUnitVectors(face.normal, READ_DIR)
     const twist = new THREE.Quaternion().setFromAxisAngle(
@@ -480,10 +483,9 @@ function DieBody({
   }, [face, idHash])
 
   /** Perfectly frontal, zero-roll orientation the die straightens into. */
-  const straightQuat = React.useMemo(
-    () => new THREE.Quaternion().setFromUnitVectors(face.normal, CAMERA_DIR),
-    [face]
-  )
+  const straightQuat =
+    settleQuats[labelIndex] ??
+    new THREE.Quaternion().setFromUnitVectors(face.normal, CAMERA_DIR)
 
   const spinAxis = React.useMemo(() => {
     const v = new THREE.Vector3(
@@ -619,7 +621,7 @@ function DieBody({
           key={i}
           face={f}
           label={labels[i]}
-          settleQuat={straightQuat}
+          settleQuat={settleQuats[i]}
           color={
             showRedResult && i === labelIndex
               ? RESULT_NUMBER_COLOR
@@ -701,7 +703,11 @@ function SceneContents({
     <>
       <hemisphereLight args={["#ffffff", palette.body, 0.95]} />
       <directionalLight position={[3.5, 5, 4]} intensity={1.7} />
-      <directionalLight position={[-4, 3, -3]} intensity={0.5} color="#9db8ff" />
+      <directionalLight
+        position={[-4, 3, -3]}
+        intensity={0.5}
+        color="#9db8ff"
+      />
       <pointLight position={[0, 0.5, 3]} intensity={0.35} />
 
       {entries.map((entry, i) => (
