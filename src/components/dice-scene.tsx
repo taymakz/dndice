@@ -39,6 +39,21 @@ const READ_DIR = new THREE.Vector3(0, 0.17, 1).normalize()
 
 /** Exact camera direction — dice straighten up to face this at the end. */
 const CAMERA_DIR = new THREE.Vector3(0, 0.9, 7).normalize()
+const CAMERA_POS = new THREE.Vector3(0, 0.9, 7)
+
+/**
+ * Upright, camera-facing orientation a settled number plane should adopt.
+ * Pairing it with each die's straighten quaternion cancels the arbitrary
+ * in-plane twist left by `setFromUnitVectors`, so digits never read
+ * upside-down or sideways once a die settles.
+ */
+const BILLBOARD_QUAT = new THREE.Quaternion().setFromRotationMatrix(
+  new THREE.Matrix4().lookAt(
+    CAMERA_POS,
+    new THREE.Vector3(0, 0, 0),
+    new THREE.Vector3(0, 1, 0)
+  )
+)
 
 /** Seconds spent straightening to a clean, upright angle after the tumble. */
 const STRAIGHTEN_DURATION = 0.35
@@ -297,8 +312,12 @@ function labelsFor(variant: Variant, type: DieType): string[] {
 
 const textureCache = new Map<string, THREE.CanvasTexture>()
 
-function getNumberTexture(label: string, color: string): THREE.CanvasTexture {
-  const key = `${label}|${color}`
+function getNumberTexture(
+  label: string,
+  color: string,
+  stroke?: string
+): THREE.CanvasTexture {
+  const key = `${label}|${color}|${stroke ?? ""}`
   const cached = textureCache.get(key)
   if (cached) return cached
 
@@ -311,6 +330,12 @@ function getNumberTexture(label: string, color: string): THREE.CanvasTexture {
   ctx.font = `800 ${px}px "Vazirmatn Variable", ui-sans-serif, system-ui, sans-serif`
   ctx.textAlign = "center"
   ctx.textBaseline = "middle"
+  if (stroke) {
+    ctx.lineJoin = "round"
+    ctx.lineWidth = px * 0.22
+    ctx.strokeStyle = stroke
+    ctx.strokeText(label, size / 2, size / 2 + px * 0.06)
+  }
   ctx.fillStyle = color
   ctx.fillText(label, size / 2, size / 2 + px * 0.06)
 
@@ -336,22 +361,33 @@ function NumberPlane({
   face,
   label,
   color,
+  stroke,
+  settleQuat,
 }: {
   face: FaceInfo
   label?: string
   color: string
+  stroke?: string
+  /** The die's settled orientation — used to keep numbers upright. */
+  settleQuat?: THREE.Quaternion
 }) {
   const quaternion = React.useMemo(
-    () => new THREE.Quaternion().setFromUnitVectors(Z_AXIS, face.normal),
-    [face]
+    () =>
+      // world = settleQuat * planeQuat = BILLBOARD_QUAT  →  planeQuat =
+      // settleQuat⁻¹ * BILLBOARD_QUAT, so the digit faces the camera and
+      // sits perfectly upright once the die straightens up.
+      settleQuat
+        ? settleQuat.clone().invert().multiply(BILLBOARD_QUAT)
+        : new THREE.Quaternion().setFromUnitVectors(Z_AXIS, face.normal),
+    [face, settleQuat]
   )
   const position = React.useMemo(
     () => face.center.clone().multiplyScalar(1.035),
     [face]
   )
   const texture = React.useMemo(
-    () => (label ? getNumberTexture(label, color) : null),
-    [label, color]
+    () => (label ? getNumberTexture(label, color, stroke) : null),
+    [label, color, stroke]
   )
 
   if (!texture || !label) return null
@@ -583,11 +619,13 @@ function DieBody({
           key={i}
           face={f}
           label={labels[i]}
+          settleQuat={straightQuat}
           color={
             showRedResult && i === labelIndex
               ? RESULT_NUMBER_COLOR
               : numberColor
           }
+          stroke={showRedResult && i === labelIndex ? "#ffffff" : undefined}
         />
       ))}
     </group>

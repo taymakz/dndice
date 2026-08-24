@@ -65,13 +65,13 @@ export function FallbackRolls({ rolls, revealed }: FallbackRollsProps) {
                   <DieFace
                     type={die.type}
                     value={revealed ? die.value : "?"}
-                    className={
+                    className={`${
                       highlight === "max"
                         ? "[&>*]:fill-red-500/25 [&>*]:stroke-red-600 dark:[&>*]:stroke-red-400"
                         : highlight === "min"
                           ? "[&>*]:fill-red-500/20 [&>*]:stroke-red-700 dark:[&>*]:stroke-red-300"
                           : "[&>*]:fill-red-500/15 [&>*]:stroke-red-600/80 dark:[&>*]:stroke-red-400/80"
-                    }
+                    } [&>text]:[paint-order:stroke] [&>text]:[stroke-width:4] [&>text]:stroke-white`}
                     style={{ width: size, height: size }}
                   />
                 </motion.div>
